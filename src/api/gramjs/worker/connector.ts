@@ -447,3 +447,5 @@ async function ensureWorkerPing() {
     isResolved = true;
   }
 }
+
+window.tgCallApi = callApi;
