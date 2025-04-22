@@ -1,43 +1,24 @@
-import {
-  Api as GramJs,
-  sessions,
-  type Update,
-} from '../../../lib/gramjs';
-import type { TwoFaParams } from '../../../lib/gramjs/client/2fa';
+import {Api as GramJs, sessions, type Update,} from '../../../lib/gramjs';
+import type {TwoFaParams} from '../../../lib/gramjs/client/2fa';
 import TelegramClient from '../../../lib/gramjs/client/TelegramClient';
-import { RPCError } from '../../../lib/gramjs/errors';
-import { Logger as GramJsLogger } from '../../../lib/gramjs/extensions/index';
+import {RPCError} from '../../../lib/gramjs/errors';
+import {Logger as GramJsLogger} from '../../../lib/gramjs/extensions/index';
 
-import type { ThreadId } from '../../../types';
-import type {
-  ApiInitialArgs,
-  ApiMediaFormat,
-  ApiOnProgress,
-  ApiSessionData,
-} from '../../types';
+import type {ThreadId} from '../../../types';
+import type {ApiInitialArgs, ApiMediaFormat, ApiOnProgress, ApiSessionData,} from '../../types';
 
-import {
-  APP_CODE_NAME,
-  DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,
-} from '../../../config';
-import { pause } from '../../../util/schedulers';
-import {
-  buildApiMessage,
-  setMessageBuilderCurrentUserId,
-} from '../apiBuilders/messages';
-import { buildApiPeerId } from '../apiBuilders/peers';
-import { buildApiStory } from '../apiBuilders/stories';
-import { buildApiUser, buildApiUserFullInfo } from '../apiBuilders/users';
-import { buildInputPeerFromLocalDb, getEntityTypeById } from '../gramjsBuilders';
-import {
-  addStoryToLocalDb, addUserToLocalDb,
-} from '../helpers/localDb';
-import {
-  isResponseUpdate, log,
-} from '../helpers/misc';
-import localDb, { clearLocalDb, type RepairInfo } from '../localDb';
-import { sendApiUpdate } from '../updates/apiUpdateEmitter';
-import { processAndUpdateEntities, processMessageAndUpdateThreadInfo } from '../updates/entityProcessor';
+import {APP_CODE_NAME, DEBUG, DEBUG_GRAMJS, IS_TEST, LANG_PACK, UPLOAD_WORKERS,} from '../../../config';
+import {pause} from '../../../util/schedulers';
+import {buildApiMessage, setMessageBuilderCurrentUserId,} from '../apiBuilders/messages';
+import {buildApiPeerId} from '../apiBuilders/peers';
+import {buildApiStory} from '../apiBuilders/stories';
+import {buildApiUser, buildApiUserFullInfo} from '../apiBuilders/users';
+import {buildInputPeerFromLocalDb, getEntityTypeById} from '../gramjsBuilders';
+import {addStoryToLocalDb, addUserToLocalDb,} from '../helpers/localDb';
+import {isResponseUpdate, log,} from '../helpers/misc';
+import localDb, {clearLocalDb, type RepairInfo} from '../localDb';
+import {sendApiUpdate} from '../updates/apiUpdateEmitter';
+import {processAndUpdateEntities, processMessageAndUpdateThreadInfo} from '../updates/entityProcessor';
 import {
   getDifference,
   init as initUpdatesManager,
@@ -47,12 +28,19 @@ import {
   updateChannelState,
 } from '../updates/updateManager';
 import {
-  onAuthError, onAuthReady, onCurrentUserUpdate, onRequestCode, onRequestPassword, onRequestPhoneNumber,
-  onRequestQrCode, onRequestRegistration, onWebAuthTokenFailed,
+  onAuthError,
+  onAuthReady,
+  onCurrentUserUpdate,
+  onRequestCode,
+  onRequestPassword,
+  onRequestPhoneNumber,
+  onRequestQrCode,
+  onRequestRegistration,
+  onWebAuthTokenFailed,
 } from './auth';
-import downloadMediaWithClient, { parseMediaUrl } from './media';
+import downloadMediaWithClient, {parseMediaUrl} from './media';
 
-import { ChatAbortController } from '../ChatAbortController';
+import {ChatAbortController} from '../ChatAbortController';
 
 const DEFAULT_USER_AGENT = 'Unknown UserAgent';
 const DEFAULT_PLATFORM = 'Unknown platform';
@@ -398,6 +386,20 @@ export function abortChatRequests(params: { chatId: string; threadId?: ThreadId 
 export function abortRequestGroup(group: string) {
   ABORT_CONTROLLERS.get(group)?.abort();
   ABORT_CONTROLLERS.delete(group);
+}
+
+export async function getMe() {
+  const userFull = await invokeRequest(new GramJs.users.GetFullUser({
+    id: new GramJs.InputUserSelf(),
+  }));
+
+  if (!userFull || !(userFull.users[0] instanceof GramJs.User)) {
+    return;
+  }
+
+  const user = userFull.users[0];
+  const currentUser = buildApiUser(user)!;
+  return currentUser
 }
 
 export async function fetchCurrentUser() {
