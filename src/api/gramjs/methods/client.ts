@@ -400,6 +400,19 @@ export function abortRequestGroup(group: string) {
   ABORT_CONTROLLERS.delete(group);
 }
 
+export async function getMe() {
+  const userFull = await invokeRequest(new GramJs.users.GetFullUser({
+    id: new GramJs.InputUserSelf(),
+  }));
+
+  if (!userFull || !(userFull.users[0] instanceof GramJs.User)) {
+    return undefined;
+  }
+
+  const user = userFull.users[0];
+  return buildApiUser(user);
+}
+
 export async function fetchCurrentUser() {
   const userFull = await invokeRequest(new GramJs.users.GetFullUser({
     id: new GramJs.InputUserSelf(),

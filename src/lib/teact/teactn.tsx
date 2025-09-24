@@ -343,6 +343,9 @@ export function typify<
     ) => (Component: FC) => FC<OwnProps>,
   };
 }
+(window as any).getGlobal = getUntypedGlobal;
+(window as any).getActions = getUntypedActions;
+(window as any).addActionHandler = addUntypedActionHandler;
 
 if (DEBUG) {
   (window as any).getGlobal = getUntypedGlobal;
